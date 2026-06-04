@@ -42,7 +42,6 @@
     .edit-btn { background: #fef0d9; color: #e65100; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
     .del-btn { background: #feebee; color: #c62828; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
     
-    /* Recent Bills Section */
     .recent-bills-box { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
     .bill-card { background: #fff; border: 1px solid #ddd; border-left: 4px solid #1a73e8; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .bill-info h4 { margin: 0 0 4px 0; font-size: 15px; color: #333; }
@@ -112,8 +111,8 @@
 
   <script>
     // ==============================================================
-    // YAHAN APNA GOOGLE APPS SCRIPT KA "WEB APP URL" DAALNA HAI
-    var API_URL = "YAHAN_APNA_LINK_DAALEIN"; 
+    // GOOGLE APPS SCRIPT LINK LOCKED & CONNECTED SUCCESSFULLY
+    var API_URL = "https://script.google.com/macros/s/AKfycbyD6M49wYf3BwpwbH4rZSRX1T_K8TqGvtua9_SU4ToS8WNloPN8mNbnqdg_SnqQIFg4/exec"; 
     // ==============================================================
 
     var cart = []; 
@@ -122,7 +121,6 @@
     var activeBillNo = "";
     var fetchedBills = [];
 
-    // App khulte hi purane bills fetch karna
     function fetchRecentBills() {
       fetch(API_URL, {
         method: 'POST',
@@ -154,13 +152,12 @@
       });
     }
 
-    // Naya bill shuru karna
     function startNewBill() {
       var party = document.getElementById('partyName').value.trim();
       if(!party) return alert("Please enter Party Name!");
       
       editingMode = false;
-      activeBillNo = "GC-" + Math.floor(Date.now() / 1000); // Fresh Bill No
+      activeBillNo = "GC-" + Math.floor(Date.now() / 1000);
       
       document.getElementById('billHeader').innerText = "New: " + party;
       document.getElementById('finalBtn').className = "btn-success hidden";
@@ -170,14 +167,12 @@
       document.getElementById('step2').classList.remove('hidden');
     }
 
-    // Purana bill Edit karne ke liye UI setup karna
     function loadBillForEdit(index) {
       var bill = fetchedBills[index];
       editingMode = true;
       activeBillNo = bill.billNo;
       document.getElementById('partyName').value = bill.partyName;
       
-      // Purane items ko cart mein daalna
       cart = bill.items.map(function(item) {
         return {
           itemName: item.itemName,
@@ -206,7 +201,6 @@
       }
     }
 
-    // Photo selection logic
     document.getElementById('imageFile').addEventListener('change', function(e) {
       var file = e.target.files[0];
       var label = document.getElementById('photoLabel');

@@ -47,7 +47,6 @@
     .bill-info h4 { margin: 0 0 4px 0; font-size: 15px; color: #333; }
     .bill-info p { margin: 0; font-size: 12px; color: #777; }
     
-    /* New PDF Download Button Style */
     .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
     .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 5px; }
     .action-col { display: flex; flex-direction: column; width: 70px; }
@@ -121,6 +120,10 @@
     var editingMode = false;
     var activeBillNo = "";
     var fetchedBills = [];
+    
+    // Globals to store current PDF for direct attachment sharing
+    var currentPdfBase64 = "";
+    var currentPdfName = "";
 
     function fetchRecentBills() {
       fetch(API_URL, {
@@ -156,7 +159,6 @@
       });
     }
 
-    // Naya function: Past PDF Download karne ke liye
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
       btn.innerText = "⏳ Wait..";
@@ -172,7 +174,10 @@
         btn.innerText = "⬇️ PDF";
         btn.disabled = false;
         if(data.success) {
-          window.open(data.url, '_blank');
+          // Direct native sheet open for past bills as well!
+          currentPdfBase64 = data.pdfBase64;
+          currentPdfName = data.fileName;
+          shareAsActualFile();
         } else {
           alert("Error: " + data.error);
         }
@@ -182,6 +187,39 @@
         btn.disabled = false;
         alert("Network Error!");
       });
+    }
+
+    // =========================================================================
+    // NATIVE SYSTEM SHARING (PDF ATTACHMENT DELIVER SYSTEM)
+    // =========================================================================
+    function shareAsActualFile() {
+      if (!currentPdfBase64) return alert("PDF data nahi mila!");
+      
+      try {
+        var byteCharacters = atob(currentPdfBase64);
+        var byteNumbers = new Array(byteCharacters.length);
+        for (var i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        var byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], {type: 'application/pdf'});
+        var file = new File([blob], currentPdfName, {type: 'application/pdf'});
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: currentPdfName,
+            text: 'Ganesh Mobile Covers Wholesale Bill'
+          })
+          .catch(function(error) {
+            console.log('Sharing canceled:', error);
+          });
+        } else {
+          alert("Aapka browser direct file share support nahi karta. 'Open / View PDF' karke manually download karein.");
+        }
+      } catch(e) {
+        alert("File prepare karne mein dikat aayi: " + e.toString());
+      }
     }
 
     function startNewBill() {
@@ -329,9 +367,13 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
+          currentPdfBase64 = data.pdfBase64;
+          currentPdfName = data.fileName;
+
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
-                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:12px 20px; text-decoration:none; border-radius:8px; font-weight:bold; display:inline-block; width:100%;">📄 Open & Share PDF</a>' +
+                          '<button onclick="shareAsActualFile()" style="background:#25D366; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">💬 Share Actual PDF File via WhatsApp</button>' +
+                          '<a href="' + data.url + '" target="_blank" style="background:#1a73e8; color:white; padding:12px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:14px;">📄 Open / Print View</a>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           

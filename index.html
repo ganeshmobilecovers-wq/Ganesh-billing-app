@@ -48,8 +48,8 @@
     .bill-info p { margin: 0; font-size: 12px; color: #777; }
     
     .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
-    .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 5px; }
-    .action-col { display: flex; flex-direction: column; width: 70px; }
+    .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 5px; transition: all 0.2s; }
+    .action-col { display: flex; flex-direction: column; width: 75px; }
     
     .hidden { display: none !important; }
     #statusMsg { text-align: center; margin-top: 20px; font-weight: 600; font-size: 15px; line-height: 1.5; }
@@ -121,7 +121,6 @@
     var activeBillNo = "";
     var fetchedBills = [];
     
-    // Globals to store current PDF for direct attachment sharing
     var currentPdfBase64 = "";
     var currentPdfName = "";
 
@@ -159,9 +158,13 @@
       });
     }
 
+    // =========================================================================
+    // SMART 2-TAP SYSTEM FOR PAST BILLS (SAFARI BYPASS)
+    // =========================================================================
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
-      btn.innerText = "⏳ Wait..";
+      btn.innerText = "⏳ Fetch..";
+      btn.style.background = "#ff9800"; // Orange color while loading
       btn.disabled = true;
 
       fetch(API_URL, {
@@ -171,27 +174,32 @@
       })
       .then(response => response.json())
       .then(data => {
-        btn.innerText = "⬇️ PDF";
-        btn.disabled = false;
         if(data.success) {
-          // Direct native sheet open for past bills as well!
           currentPdfBase64 = data.pdfBase64;
           currentPdfName = data.fileName;
-          shareAsActualFile();
+          
+          // Tap 1 complete: UI turns Green and becomes a direct action button
+          btn.innerText = "💬 Share";
+          btn.style.background = "#25D366"; // WhatsApp Green
+          btn.disabled = false;
+          
+          // Dynamically change onclick to direct share function (Direct User Gesture)
+          btn.onclick = function() { shareAsActualFile(); };
         } else {
+          btn.innerText = "⬇️ PDF";
+          btn.style.background = "#0f9d58";
+          btn.disabled = false;
           alert("Error: " + data.error);
         }
       })
       .catch(err => {
         btn.innerText = "⬇️ PDF";
+        btn.style.background = "#0f9d58";
         btn.disabled = false;
         alert("Network Error!");
       });
     }
 
-    // =========================================================================
-    // NATIVE SYSTEM SHARING (PDF ATTACHMENT DELIVER SYSTEM)
-    // =========================================================================
     function shareAsActualFile() {
       if (!currentPdfBase64) return alert("PDF data nahi mila!");
       
@@ -212,13 +220,13 @@
             text: 'Ganesh Mobile Covers Wholesale Bill'
           })
           .catch(function(error) {
-            console.log('Sharing canceled:', error);
+            console.log('Sharing canceled');
           });
         } else {
-          alert("Aapka browser direct file share support nahi karta. 'Open / View PDF' karke manually download karein.");
+          alert("Direct file share support nahi mila. Open PDF karke manually share karein.");
         }
       } catch(e) {
-        alert("File prepare karne mein dikat aayi: " + e.toString());
+        alert("File share karne mein dikat aayi: " + e.toString());
       }
     }
 

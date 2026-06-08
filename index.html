@@ -47,9 +47,9 @@
     .bill-info h4 { margin: 0 0 4px 0; font-size: 15px; color: #333; }
     .bill-info p { margin: 0; font-size: 12px; color: #777; }
     
-    .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
-    .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 5px; transition: all 0.2s; }
-    .action-col { display: flex; flex-direction: column; width: 75px; }
+    .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
+    .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 6px; }
+    .action-col { display: flex; flex-direction: column; width: 80px; }
     
     .hidden { display: none !important; }
     #statusMsg { text-align: center; margin-top: 20px; font-weight: 600; font-size: 15px; line-height: 1.5; }
@@ -113,16 +113,16 @@
   </div>
 
   <script>
+    // ==============================================================
+    // GOOGLE APPS SCRIPT LINK
     var API_URL = "https://script.google.com/macros/s/AKfycbyD6M49wYf3BwpwbH4rZSRX1T_K8TqGvtua9_SU4ToS8WNloPN8mNbnqdg_SnqQIFg4/exec"; 
+    // ==============================================================
 
     var cart = []; 
     var currentBillTotal = 0;
     var editingMode = false;
     var activeBillNo = "";
     var fetchedBills = [];
-    
-    var currentPdfBase64 = "";
-    var currentPdfName = "";
 
     function fetchRecentBills() {
       fetch(API_URL, {
@@ -145,7 +145,7 @@
                           '</div>' +
                           '<div class="action-col">' +
                             '<button class="bill-edit-btn" onclick="loadBillForEdit(' + i + ')">✎ Edit</button>' +
-                            '<button class="bill-dl-btn" id="dlBtn_' + b.billNo + '" onclick="downloadPastBill(\'' + b.billNo + '\')">⬇️ PDF</button>' +
+                            '<button class="bill-dl-btn" id="dlBtn_' + b.billNo + '" onclick="downloadPastBill(\'' + b.billNo + '\')">⬇️ Open PDF</button>' +
                           '</div>' +
                         '</div>';
           }
@@ -159,14 +159,18 @@
     }
 
     // =========================================================================
-    // SMART 2-TAP SYSTEM FOR PAST BILLS (SAFARI BYPASS)
+    // 1-CLICK MAGIC SYSTEM (Bypasses Safari Popup Blocker)
     // =========================================================================
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
-      btn.innerText = "⏳ Fetch..";
-      btn.style.background = "#ff9800"; // Orange color while loading
+      btn.innerText = "⏳ Wait..";
       btn.disabled = true;
 
+      // 1. Click karte hi ek naya tab khol diya (Safari block nahi karega)
+      var pdfTab = window.open('about:blank', '_blank');
+      pdfTab.document.write('<div style="text-align:center; padding-top:50px; font-family:sans-serif; color:#1a73e8;"><h2>⏳ PDF Bill Loading...</h2><p>Please wait a second.</p></div>');
+
+      // 2. Background mein PDF link fetch karna
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'getBillPdf', billNo: billNo }),
@@ -174,60 +178,23 @@
       })
       .then(response => response.json())
       .then(data => {
+        btn.innerText = "⬇️ Open PDF";
+        btn.disabled = false;
+        
         if(data.success) {
-          currentPdfBase64 = data.pdfBase64;
-          currentPdfName = data.fileName;
-          
-          // Tap 1 complete: UI turns Green and becomes a direct action button
-          btn.innerText = "💬 Share";
-          btn.style.background = "#25D366"; // WhatsApp Green
-          btn.disabled = false;
-          
-          // Dynamically change onclick to direct share function (Direct User Gesture)
-          btn.onclick = function() { shareAsActualFile(); };
+          // 3. Jaise hi link aayi, ussi khule hue tab mein PDF dikha di
+          pdfTab.location.href = data.url; 
         } else {
-          btn.innerText = "⬇️ PDF";
-          btn.style.background = "#0f9d58";
-          btn.disabled = false;
+          pdfTab.close();
           alert("Error: " + data.error);
         }
       })
       .catch(err => {
-        btn.innerText = "⬇️ PDF";
-        btn.style.background = "#0f9d58";
+        btn.innerText = "⬇️ Open PDF";
         btn.disabled = false;
+        pdfTab.close();
         alert("Network Error!");
       });
-    }
-
-    function shareAsActualFile() {
-      if (!currentPdfBase64) return alert("PDF data nahi mila!");
-      
-      try {
-        var byteCharacters = atob(currentPdfBase64);
-        var byteNumbers = new Array(byteCharacters.length);
-        for (var i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        var byteArray = new Uint8Array(byteNumbers);
-        var blob = new Blob([byteArray], {type: 'application/pdf'});
-        var file = new File([blob], currentPdfName, {type: 'application/pdf'});
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            files: [file],
-            title: currentPdfName,
-            text: 'Ganesh Mobile Covers Wholesale Bill'
-          })
-          .catch(function(error) {
-            console.log('Sharing canceled');
-          });
-        } else {
-          alert("Direct file share support nahi mila. Open PDF karke manually share karein.");
-        }
-      } catch(e) {
-        alert("File share karne mein dikat aayi: " + e.toString());
-      }
     }
 
     function startNewBill() {
@@ -375,13 +342,10 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
-          currentPdfBase64 = data.pdfBase64;
-          currentPdfName = data.fileName;
-
+          // Bill banne ke baad seedha "Open PDF" ka bada button
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
-                          '<button onclick="shareAsActualFile()" style="background:#25D366; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">💬 Share Actual PDF File via WhatsApp</button>' +
-                          '<a href="' + data.url + '" target="_blank" style="background:#1a73e8; color:white; padding:12px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:14px;">📄 Open / Print View</a>' +
+                          '<button onclick="window.open(\'' + data.url + '\', \'_blank\')" style="background:#0f9d58; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</button>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           

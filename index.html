@@ -55,6 +55,10 @@
     #statusMsg { text-align: center; margin-top: 20px; font-weight: 600; font-size: 15px; line-height: 1.5; }
     .bill-title-bar { background: #fef0f0; padding: 10px 15px; border-radius: 10px; border-left: 4px solid #d32f2f; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
     .bill-title-bar h2 { margin: 0; font-size: 16px; color: #d32f2f; }
+    
+    .parcel-box { background: #fff8e1; border: 1px solid #ffb300; padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .parcel-box label { margin: 0; color: #f57f17; font-size: 14px; }
+    .parcel-box input { width: 100px; padding: 8px; border: 1px solid #ffb300; border-radius: 8px; font-weight: bold; text-align: right; }
   </style>
 </head>
 <body onload="fetchRecentBills()">
@@ -94,8 +98,8 @@
       <input type="hidden" id="imageBase64">
 
       <div class="row">
-        <div><label>Quantity</label><input type="number" id="qty" placeholder="0" required></div>
-        <div><label>Rate (₹)</label><input type="number" id="rate" placeholder="0.00"></div>
+        <div><label>Quantity</label><input type="number" id="qty" placeholder="0" step="any" required></div>
+        <div><label>Rate (₹)</label><input type="number" id="rate" placeholder="0" step="any"></div>
       </div>
       <button type="submit" class="btn-primary">＋ Add Item to List</button>
     </form>
@@ -103,9 +107,17 @@
     <div class="cart-box">
       <div class="cart-header">
         <strong>Items: <span id="itemCount">0</span></strong>
-        <strong style="color:#d32f2f;">Total: ₹<span id="grandTotal">0</span></strong>
       </div>
       <ul id="itemList"></ul>
+    </div>
+
+    <div class="parcel-box">
+      <label>📦 Parcel / Extra Charges (₹):</label>
+      <input type="number" id="parcelCharges" placeholder="0" value="0" step="any" oninput="updateCartUI()">
+    </div>
+    
+    <div style="text-align: right; margin-top: 15px; font-size: 18px;">
+      <strong style="color:#d32f2f;">Grand Total: ₹<span id="grandTotal">0</span></strong>
     </div>
 
     <button id="finalBtn" class="btn-success hidden" onclick="uploadAndGenerateBill()">✓ Generate PDF Bill</button>
@@ -113,13 +125,10 @@
   </div>
 
   <script>
-    // ==============================================================
-    // GOOGLE APPS SCRIPT LINK
     var API_URL = "https://script.google.com/macros/s/AKfycbyD6M49wYf3BwpwbH4rZSRX1T_K8TqGvtua9_SU4ToS8WNloPN8mNbnqdg_SnqQIFg4/exec"; 
-    // ==============================================================
 
     var cart = []; 
-    var currentBillTotal = 0;
+    var currentItemsTotal = 0;
     var editingMode = false;
     var activeBillNo = "";
     var fetchedBills = [];
@@ -141,7 +150,8 @@
             listHtml += '<div class="bill-card">' +
                           '<div class="bill-info">' +
                             '<h4>' + b.partyName + '</h4>' +
-                            '<p>' + b.billNo + ' | ' + b.date + ' | <strong>₹' + b.total + '</strong></p>' +
+                            // .00 hatane ke liye parseFloat
+                            '<p>' + b.billNo + ' | ' + b.date + ' | <strong>₹' + parseFloat(b.total.toFixed(2)) + '</strong></p>' +
                           '</div>' +
                           '<div class="action-col">' +
                             '<button class="bill-edit-btn" onclick="loadBillForEdit(' + i + ')">✎ Edit</button>' +
@@ -158,19 +168,14 @@
       });
     }
 
-    // =========================================================================
-    // 1-CLICK MAGIC SYSTEM (Bypasses Safari Popup Blocker)
-    // =========================================================================
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
       btn.innerText = "⏳ Wait..";
       btn.disabled = true;
 
-      // 1. Click karte hi ek naya tab khol diya (Safari block nahi karega)
       var pdfTab = window.open('about:blank', '_blank');
       pdfTab.document.write('<div style="text-align:center; padding-top:50px; font-family:sans-serif; color:#1a73e8;"><h2>⏳ PDF Bill Loading...</h2><p>Please wait a second.</p></div>');
 
-      // 2. Background mein PDF link fetch karna
       fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'getBillPdf', billNo: billNo }),
@@ -182,8 +187,7 @@
         btn.disabled = false;
         
         if(data.success) {
-          // 3. Jaise hi link aayi, ussi khule hue tab mein PDF dikha di
-          pdfTab.location.href = data.url; 
+          pdfTab.location.href = data.directUrl; 
         } else {
           pdfTab.close();
           alert("Error: " + data.error);
@@ -203,6 +207,7 @@
       
       editingMode = false;
       activeBillNo = "GC-" + Math.floor(Date.now() / 1000);
+      document.getElementById('parcelCharges').value = "0"; 
       
       document.getElementById('billHeader').innerText = "New: " + party;
       document.getElementById('finalBtn').className = "btn-success hidden";
@@ -217,6 +222,7 @@
       editingMode = true;
       activeBillNo = bill.billNo;
       document.getElementById('partyName').value = bill.partyName;
+      document.getElementById('parcelCharges').value = bill.parcelCharges || "0"; 
       
       cart = bill.items.map(function(item) {
         return { itemName: item.itemName, qty: item.qty, rate: item.rate, imageBase64: "", oldImgUrl: item.oldImgUrl };
@@ -282,17 +288,28 @@
 
     function updateCartUI() {
       var list = document.getElementById('itemList');
-      list.innerHTML = ""; currentBillTotal = 0;
+      list.innerHTML = ""; currentItemsTotal = 0;
       
       for(var i = 0; i < cart.length; i++) {
-        var total = parseFloat(cart[i].qty) * parseFloat(cart[i].rate);
-        currentBillTotal += total;
-        list.innerHTML += "<li class='cart-item'><span class='cart-item-text'>" + (i+1) + ". " + cart[i].itemName + " <br><span style='font-size:12px; color:#777;'>₹" + cart[i].rate + " × " + cart[i].qty + " = <strong>₹" + total + "</strong></span></span>" +
+        var qtyStr = parseFloat(cart[i].qty) || 0;
+        var rateStr = parseFloat(cart[i].rate) || 0;
+        var total = qtyStr * rateStr;
+        currentItemsTotal += total;
+        
+        // Zero (00) hatane ki setting yahan add ki gayi hai
+        var displayRate = parseFloat(rateStr.toFixed(2));
+        var displayTotal = parseFloat(total.toFixed(2));
+        
+        list.innerHTML += "<li class='cart-item'><span class='cart-item-text'>" + (i+1) + ". " + cart[i].itemName + " <br><span style='font-size:12px; color:#777;'>₹" + displayRate + " × " + qtyStr + " = <strong>₹" + displayTotal + "</strong></span></span>" +
                           "<div class='action-btns'><button type='button' class='edit-btn' onclick='editItem(" + i + ")'>✎ Edit</button><button type='button' class='del-btn' onclick='deleteItem(" + i + ")'>✖</button></div></li>";
       }
       
       document.getElementById('itemCount').innerText = cart.length;
-      document.getElementById('grandTotal').innerText = currentBillTotal;
+      
+      var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
+      // Grand Total mein se bhi zero (00) hatane ki setting
+      var finalTotal = currentItemsTotal + pCharge;
+      document.getElementById('grandTotal').innerText = parseFloat(finalTotal.toFixed(2));
       
       var fBtn = document.getElementById('finalBtn');
       if(cart.length > 0) { fBtn.classList.remove('hidden'); } else { fBtn.classList.add('hidden'); }
@@ -322,6 +339,7 @@
       var btn = document.getElementById('finalBtn');
       var msg = document.getElementById('statusMsg');
       var partyName = document.getElementById('partyName').value;
+      var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
 
       btn.innerText = editingMode ? "Updating Data..." : "Generating PDF...";
       btn.disabled = true;
@@ -331,6 +349,7 @@
         action: editingMode ? 'updateBill' : 'saveBill',
         billNo: activeBillNo,
         partyName: partyName,
+        parcelCharges: pCharge,
         cart: cart
       };
 
@@ -342,10 +361,9 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
-          // Bill banne ke baad seedha "Open PDF" ka bada button
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
-                          '<button onclick="window.open(\'' + data.url + '\', \'_blank\')" style="background:#0f9d58; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</button>' +
+                          '<button onclick="window.open(\'' + data.directUrl + '\', \'_blank\')" style="background:#0f9d58; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</button>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           

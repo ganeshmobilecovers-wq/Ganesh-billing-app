@@ -150,7 +150,6 @@
             listHtml += '<div class="bill-card">' +
                           '<div class="bill-info">' +
                             '<h4>' + b.partyName + '</h4>' +
-                            // .00 hatane ke liye parseFloat
                             '<p>' + b.billNo + ' | ' + b.date + ' | <strong>₹' + parseFloat(b.total.toFixed(2)) + '</strong></p>' +
                           '</div>' +
                           '<div class="action-col">' +
@@ -168,11 +167,13 @@
       });
     }
 
+    // Direct PDF Link Open System - Safari ke hisab se theek kiya hua
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
       btn.innerText = "⏳ Wait..";
       btn.disabled = true;
 
+      // Click karte hi pre-load tab
       var pdfTab = window.open('about:blank', '_blank');
       pdfTab.document.write('<div style="text-align:center; padding-top:50px; font-family:sans-serif; color:#1a73e8;"><h2>⏳ PDF Bill Loading...</h2><p>Please wait a second.</p></div>');
 
@@ -187,7 +188,8 @@
         btn.disabled = false;
         
         if(data.success) {
-          pdfTab.location.href = data.directUrl; 
+          // Direct Download link nahi, ab standard Google Drive Viewer use hoga
+          pdfTab.location.href = data.url; 
         } else {
           pdfTab.close();
           alert("Error: " + data.error);
@@ -296,7 +298,6 @@
         var total = qtyStr * rateStr;
         currentItemsTotal += total;
         
-        // Zero (00) hatane ki setting yahan add ki gayi hai
         var displayRate = parseFloat(rateStr.toFixed(2));
         var displayTotal = parseFloat(total.toFixed(2));
         
@@ -307,7 +308,6 @@
       document.getElementById('itemCount').innerText = cart.length;
       
       var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
-      // Grand Total mein se bhi zero (00) hatane ki setting
       var finalTotal = currentItemsTotal + pCharge;
       document.getElementById('grandTotal').innerText = parseFloat(finalTotal.toFixed(2));
       
@@ -361,9 +361,12 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
+          // =========================================================================
+          // SAFARI KE LIYE DIRECT LINK TAG (<a>) USE KIYA GAYA HAI 
+          // =========================================================================
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
-                          '<button onclick="window.open(\'' + data.directUrl + '\', \'_blank\')" style="background:#0f9d58; color:white; padding:14px 20px; border:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</button>' +
+                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</a>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           

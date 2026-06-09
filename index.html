@@ -167,13 +167,11 @@
       });
     }
 
-    // Direct PDF Link Open System - Safari ke hisab se theek kiya hua
     function downloadPastBill(billNo) {
       var btn = document.getElementById('dlBtn_' + billNo);
       btn.innerText = "⏳ Wait..";
       btn.disabled = true;
 
-      // Click karte hi pre-load tab
       var pdfTab = window.open('about:blank', '_blank');
       pdfTab.document.write('<div style="text-align:center; padding-top:50px; font-family:sans-serif; color:#1a73e8;"><h2>⏳ PDF Bill Loading...</h2><p>Please wait a second.</p></div>');
 
@@ -188,7 +186,6 @@
         btn.disabled = false;
         
         if(data.success) {
-          // Direct Download link nahi, ab standard Google Drive Viewer use hoga
           pdfTab.location.href = data.url; 
         } else {
           pdfTab.close();
@@ -286,6 +283,8 @@
       document.getElementById('photoLabel').innerHTML = "📸 Tap to Take Photo"; document.getElementById('photoLabel').style.color = "#1a73e8";
       
       updateCartUI();
+      // Yahan Focus add kiya gaya hai, taaki sirf naya item add hone par screen upar jaye
+      document.getElementById('itemName').focus(); 
     }
 
     function updateCartUI() {
@@ -313,7 +312,7 @@
       
       var fBtn = document.getElementById('finalBtn');
       if(cart.length > 0) { fBtn.classList.remove('hidden'); } else { fBtn.classList.add('hidden'); }
-      document.getElementById('itemName').focus(); 
+      // Yahan se focus hata diya gaya hai taaki parcel charge type karte waqt screen jump na kare
     }
 
     function editItem(index) {
@@ -327,6 +326,8 @@
          document.getElementById('photoLabel').style.color = "#0f9d58";
       }
       cart.splice(index, 1); updateCartUI();
+      // Yahan bhi focus add kiya hai taaki item edit karne ke baad upar jaye
+      document.getElementById('itemName').focus();
     }
 
     function deleteItem(index) {
@@ -361,9 +362,6 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
-          // =========================================================================
-          // SAFARI KE LIYE DIRECT LINK TAG (<a>) USE KIYA GAYA HAI 
-          // =========================================================================
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
                           '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</a>' +

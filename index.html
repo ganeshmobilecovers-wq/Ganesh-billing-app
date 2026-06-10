@@ -61,7 +61,7 @@
     .parcel-box input { width: 100px; padding: 8px; border: 1px solid #ffb300; border-radius: 8px; font-weight: bold; text-align: right; }
   </style>
 </head>
-<body onload="fetchRecentBills()">
+<body onload="restoreDraft(); fetchRecentBills(); if(cart.length>0){document.getElementById('step1').classList.add('hidden');document.getElementById('step2').classList.remove('hidden');updateCartUI();}">
 
   <div class="container" id="step1">
     <div class="brand-header">
@@ -127,7 +127,7 @@
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbyD6M49wYf3BwpwbH4rZSRX1T_K8TqGvtua9_SU4ToS8WNloPN8mNbnqdg_SnqQIFg4/exec"; 
 
-    var cart = []; 
+    var cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); 
     var currentItemsTotal = 0;
     var editingMode = false;
     var activeBillNo = "";
@@ -214,6 +214,7 @@
       
       document.getElementById('step1').classList.add('hidden');
       document.getElementById('step2').classList.remove('hidden');
+      saveDraft();
     }
 
     function loadBillForEdit(index) {
@@ -233,12 +234,12 @@
       
       document.getElementById('step1').classList.add('hidden');
       document.getElementById('step2').classList.remove('hidden');
-      updateCartUI();
+      updateCartUI(); saveDraft();
     }
 
     function cancelBill() {
       if(confirm("Are you sure you want to cancel? Data will not be saved.")) {
-        cart = []; updateCartUI();
+        cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); updateCartUI(); saveDraft();
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
       }
@@ -282,10 +283,33 @@
       document.getElementById('imageBase64').value = "";
       document.getElementById('photoLabel').innerHTML = "📸 Tap to Take Photo"; document.getElementById('photoLabel').style.color = "#1a73e8";
       
-      updateCartUI();
+      updateCartUI(); saveDraft();
       // Yahan Focus add kiya gaya hai, taaki sirf naya item add hone par screen upar jaye
       document.getElementById('itemName').focus(); 
     }
+
+    
+    function saveDraft() {
+      try {
+        localStorage.setItem("ganesh_cart", JSON.stringify(cart));
+        localStorage.setItem("ganesh_party", document.getElementById('partyName')?.value || "");
+        localStorage.setItem("ganesh_parcel", document.getElementById('parcelCharges')?.value || "0");
+        localStorage.setItem("ganesh_billno", activeBillNo || "");
+      } catch(e){}
+    }
+
+    function restoreDraft() {
+      try {
+        var savedCart = localStorage.getItem("ganesh_cart");
+        if(savedCart){
+          cart = JSON.parse(savedCart) || [];
+          document.getElementById('partyName').value = localStorage.getItem("ganesh_party") || "";
+          document.getElementById('parcelCharges').value = localStorage.getItem("ganesh_parcel") || "0";
+          activeBillNo = localStorage.getItem("ganesh_billno") || "";
+        }
+      } catch(e){}
+    }
+
 
     function updateCartUI() {
       var list = document.getElementById('itemList');
@@ -325,13 +349,13 @@
          document.getElementById('photoLabel').innerHTML = "✅ Photo Attached!";
          document.getElementById('photoLabel').style.color = "#0f9d58";
       }
-      cart.splice(index, 1); updateCartUI();
+      cart.splice(index, 1); updateCartUI(); saveDraft();
       // Yahan bhi focus add kiya hai taaki item edit karne ke baad upar jaye
       document.getElementById('itemName').focus();
     }
 
     function deleteItem(index) {
-      if(confirm("Item hatana chahte hain?")) { cart.splice(index, 1); updateCartUI(); }
+      if(confirm("Item hatana chahte hain?")) { cart.splice(index, 1); updateCartUI(); saveDraft(); }
     }
 
     function uploadAndGenerateBill() {
@@ -369,7 +393,7 @@
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           
           btn.classList.add('hidden');
-          cart = []; 
+          cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); 
         } else {
           msg.innerHTML = '<span style="color: red;">Error: ' + data.error + '</span>';
           btn.disabled = false;

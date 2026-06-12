@@ -69,16 +69,13 @@
       <h2 class="brand-title">Ganesh Covers</h2>
     </div>
     
-    <!-- NAYA CONTACT SELECTOR AUR AUTOFILL SYSTEM -->
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; margin-bottom: 6px;">
       <label style="margin: 0;">Start New Bill for Party:</label>
       <button type="button" onclick="pickContact()" style="background: #eef4ff; border: 1px solid #cce0ff; color: #1a73e8; padding: 5px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">📱 Phonebook</button>
     </div>
-    <!-- autocomplete="name" keyboard ko naam suggest karne ka signal dega -->
     <input type="text" id="partyName" placeholder="e.g. Cover Khajana" autocomplete="name">
     
     <label>Party Mobile No. (WhatsApp):</label>
-    <!-- autocomplete="tel" keyboard ko phone number suggest karne ka signal dega -->
     <input type="tel" id="partyPhone" placeholder="10-digit Mobile No." autocomplete="tel">
 
     <button class="btn-primary" onclick="startNewBill()">Start New Bill ➔</button>
@@ -146,7 +143,7 @@
     var fetchedBills = [];
 
     // ==========================================
-    // CONTACT PICKER SYSTEM
+    // UPDATED CONTACT PICKER SYSTEM
     // ==========================================
     function pickContact() {
       if ('contacts' in navigator && 'ContactsManager' in window) {
@@ -157,8 +154,8 @@
                 document.getElementById('partyName').value = contacts[0].name[0];
               }
               if (contacts[0].tel && contacts[0].tel.length > 0) {
-                var phone = contacts[0].tel[0].replace(/\D/g, ''); // spaces/dashes hatao
-                if(phone.length > 10) phone = phone.slice(-10); // sirf last 10 digit rakho
+                var phone = contacts[0].tel[0].replace(/\D/g, ''); 
+                if(phone.length > 10) phone = phone.slice(-10); 
                 document.getElementById('partyPhone').value = phone;
               }
             }
@@ -167,7 +164,8 @@
             console.log("Contact select cancel ho gaya.");
           });
       } else {
-        alert("Bhai, Apple (iPhone/Safari) security ke kaaran direct phonebook access allow nahi karta.\n\nAap jab dabbe par click karenge toh iPhone keyboard ke upar apne aap 'Auto-fill' mein naam aa jayega, wahan se chun lijiye!");
+        // Naya Generic Message Jo Sabko Sahi Baat Batayega
+        alert("Bhai, aapka browser security ke kaaran direct phonebook allow nahi kar raha hai.\n\nLekin tension nahi! Aap jab naam ya number wale dabbe par click karenge, toh aapke keyboard ke upar apne aap 'Auto-fill' (Suggestions) aa jayega, wahan se direct select kar lijiye!");
       }
     }
 

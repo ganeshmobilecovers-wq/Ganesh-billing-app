@@ -12,17 +12,17 @@
   <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/3xQ4D7cz/49652EA9-11B3-4971-93FD-D547548AF4C6-2.png">
 
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f7f9; padding: 15px; margin: 0; color: #333; }
-    .container { background: #ffffff; padding: 25px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 420px; margin: 15px auto; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f7f9; padding: 15px; color: #333; -webkit-font-smoothing: antialiased; }
+    .container { background: #ffffff; padding: 25px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); max-width: 420px; margin: 15px auto; contain: content; }
     
     .brand-header { text-align: center; margin-bottom: 25px; }
     .brand-logo { width: 75px; height: 75px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 12px; }
-    .brand-title { margin: 0; color: #d32f2f; font-size: 24px; font-weight: 800; }
+    .brand-title { color: #d32f2f; font-size: 24px; font-weight: 800; }
     
     label { font-weight: 600; font-size: 13px; color: #5f6368; display: block; margin-top: 15px; margin-bottom: 6px; text-transform: uppercase; }
-    input[type="text"], input[type="number"] { width: 100%; padding: 14px 15px; border: 1px solid #e0e4e8; border-radius: 12px; font-size: 16px; background: #f8fafc; outline: none; }
-    input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.15); background: #fff; }
+    input[type="text"], input[type="number"], input[type="tel"] { width: 100%; padding: 14px 15px; border: 1px solid #e0e4e8; border-radius: 12px; font-size: 16px; background: #f8fafc; outline: none; transition: border-color 0.15s ease; }
+    input:focus { border-color: #1a73e8; background: #fff; }
     .row { display: flex; gap: 15px; }
     .row > div { flex: 1; }
     
@@ -34,18 +34,18 @@
     .btn-warning { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 700; margin-top: 25px; cursor: pointer; font-size: 16px; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     
-    .cart-box { background: #f8fafc; border: 1px solid #e0e4e8; padding: 15px; margin-top: 25px; border-radius: 16px; }
+    .cart-box { background: #f8fafc; border: 1px solid #e0e4e8; padding: 15px; margin-top: 25px; border-radius: 16px; will-change: transform; transform: translateZ(0); }
     .cart-header { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 10px; }
-    #itemList { margin: 0; padding: 0; list-style-type: none; }
+    #itemList { list-style-type: none; max-height: 350px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
     .action-btns { display: flex; gap: 8px; }
     .edit-btn { background: #fef0d9; color: #e65100; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
     .del-btn { background: #feebee; color: #c62828; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
     
     .recent-bills-box { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
-    .bill-card { background: #fff; border: 1px solid #ddd; border-left: 4px solid #1a73e8; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .bill-info h4 { margin: 0 0 4px 0; font-size: 15px; color: #333; }
-    .bill-info p { margin: 0; font-size: 12px; color: #777; }
+    .bill-card { background: #fff; border: 1px solid #ddd; border-left: 4px solid #1a73e8; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; will-change: transform; }
+    .bill-info h4 { margin-bottom: 4px; font-size: 15px; color: #333; }
+    .bill-info p { font-size: 12px; color: #777; }
     
     .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
     .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 6px; }
@@ -54,14 +54,14 @@
     .hidden { display: none !important; }
     #statusMsg { text-align: center; margin-top: 20px; font-weight: 600; font-size: 15px; line-height: 1.5; }
     .bill-title-bar { background: #fef0f0; padding: 10px 15px; border-radius: 10px; border-left: 4px solid #d32f2f; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
-    .bill-title-bar h2 { margin: 0; font-size: 16px; color: #d32f2f; }
+    .bill-title-bar h2 { font-size: 16px; color: #d32f2f; }
     
     .parcel-box { background: #fff8e1; border: 1px solid #ffb300; padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .parcel-box label { margin: 0; color: #f57f17; font-size: 14px; }
+    .parcel-box label { color: #f57f17; font-size: 14px; margin: 0; }
     .parcel-box input { width: 100px; padding: 8px; border: 1px solid #ffb300; border-radius: 8px; font-weight: bold; text-align: right; }
   </style>
 </head>
-<body onload="restoreDraft(); fetchRecentBills(); if(cart.length>0){document.getElementById('step1').classList.add('hidden');document.getElementById('step2').classList.remove('hidden');updateCartUI();}">
+<body onload="checkLocalStorageAndLoad()">
 
   <div class="container" id="step1">
     <div class="brand-header">
@@ -69,8 +69,18 @@
       <h2 class="brand-title">Ganesh Covers</h2>
     </div>
     
-    <label>Start New Bill for Party:</label>
-    <input type="text" id="partyName" placeholder="e.g. Cover Khajana" autocomplete="off">
+    <!-- NAYA CONTACT SELECTOR AUR AUTOFILL SYSTEM -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; margin-bottom: 6px;">
+      <label style="margin: 0;">Start New Bill for Party:</label>
+      <button type="button" onclick="pickContact()" style="background: #eef4ff; border: 1px solid #cce0ff; color: #1a73e8; padding: 5px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">📱 Phonebook</button>
+    </div>
+    <!-- autocomplete="name" keyboard ko naam suggest karne ka signal dega -->
+    <input type="text" id="partyName" placeholder="e.g. Cover Khajana" autocomplete="name">
+    
+    <label>Party Mobile No. (WhatsApp):</label>
+    <!-- autocomplete="tel" keyboard ko phone number suggest karne ka signal dega -->
+    <input type="tel" id="partyPhone" placeholder="10-digit Mobile No." autocomplete="tel">
+
     <button class="btn-primary" onclick="startNewBill()">Start New Bill ➔</button>
 
     <div class="recent-bills-box">
@@ -83,7 +93,7 @@
   <div class="container hidden" id="step2">
     <div class="bill-title-bar">
       <h2 id="billHeader"></h2>
-      <button onclick="cancelBill()" style="background: none; border: none; color: #d32f2f; font-weight: bold; cursor: pointer;">Cancel</button>
+      <button onclick="cancelBill()" style="background: none; border: none; color: #d32f2f; font-weight: bold; cursor: pointer; padding: 5px;">Cancel</button>
     </div>
     
     <form id="itemForm" onsubmit="addItemLocal(this)">
@@ -95,7 +105,9 @@
         <span id="photoLabel">📸 Tap to Take Photo</span>
         <input type="file" id="imageFile" accept="image/*" capture="environment">
       </div>
+      
       <input type="hidden" id="imageBase64">
+      <input type="hidden" id="oldImgUrl">
 
       <div class="row">
         <div><label>Quantity</label><input type="number" id="qty" placeholder="0" step="any" required></div>
@@ -113,7 +125,7 @@
 
     <div class="parcel-box">
       <label>📦 Parcel / Extra Charges (₹):</label>
-      <input type="number" id="parcelCharges" placeholder="0" value="0" step="any" oninput="updateCartUI()">
+      <input type="number" id="parcelCharges" placeholder="0" value="0" step="any" oninput="saveDraft(); updateCartUI();">
     </div>
     
     <div style="text-align: right; margin-top: 15px; font-size: 18px;">
@@ -127,11 +139,42 @@
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbyD6M49wYf3BwpwbH4rZSRX1T_K8TqGvtua9_SU4ToS8WNloPN8mNbnqdg_SnqQIFg4/exec"; 
 
-    var cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); 
+    var cart = []; 
     var currentItemsTotal = 0;
     var editingMode = false;
     var activeBillNo = "";
     var fetchedBills = [];
+
+    // ==========================================
+    // CONTACT PICKER SYSTEM
+    // ==========================================
+    function pickContact() {
+      if ('contacts' in navigator && 'ContactsManager' in window) {
+        navigator.contacts.select(['name', 'tel'], { multiple: false })
+          .then(contacts => {
+            if (contacts.length > 0) {
+              if (contacts[0].name && contacts[0].name.length > 0) {
+                document.getElementById('partyName').value = contacts[0].name[0];
+              }
+              if (contacts[0].tel && contacts[0].tel.length > 0) {
+                var phone = contacts[0].tel[0].replace(/\D/g, ''); // spaces/dashes hatao
+                if(phone.length > 10) phone = phone.slice(-10); // sirf last 10 digit rakho
+                document.getElementById('partyPhone').value = phone;
+              }
+            }
+          })
+          .catch(err => {
+            console.log("Contact select cancel ho gaya.");
+          });
+      } else {
+        alert("Bhai, Apple (iPhone/Safari) security ke kaaran direct phonebook access allow nahi karta.\n\nAap jab dabbe par click karenge toh iPhone keyboard ke upar apne aap 'Auto-fill' mein naam aa jayega, wahan se chun lijiye!");
+      }
+    }
+
+    function checkLocalStorageAndLoad() {
+      fetchRecentBills();
+      restoreDraft();
+    }
 
     function fetchRecentBills() {
       fetch(API_URL, {
@@ -184,19 +227,11 @@
       .then(data => {
         btn.innerText = "⬇️ Open PDF";
         btn.disabled = false;
-        
-        if(data.success) {
-          pdfTab.location.href = data.url; 
-        } else {
-          pdfTab.close();
-          alert("Error: " + data.error);
-        }
+        if(data.success) { pdfTab.location.href = data.url; } 
+        else { pdfTab.close(); alert("Error: " + data.error); }
       })
       .catch(err => {
-        btn.innerText = "⬇️ Open PDF";
-        btn.disabled = false;
-        pdfTab.close();
-        alert("Network Error!");
+        btn.innerText = "⬇️ Open PDF"; btn.disabled = false; pdfTab.close(); alert("Network Error!");
       });
     }
 
@@ -234,12 +269,15 @@
       
       document.getElementById('step1').classList.add('hidden');
       document.getElementById('step2').classList.remove('hidden');
-      updateCartUI(); saveDraft();
+      updateCartUI(); 
+      saveDraft();
     }
 
     function cancelBill() {
       if(confirm("Are you sure you want to cancel? Data will not be saved.")) {
-        cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); updateCartUI(); saveDraft();
+        cart = []; 
+        clearDraft(); 
+        updateCartUI();
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
       }
@@ -255,10 +293,11 @@
           var img = new Image();
           img.onload = function() {
             var canvas = document.createElement('canvas');
-            var scaleSize = 600 / img.width;
-            canvas.width = 600; canvas.height = img.height * scaleSize;
+            var scaleSize = 150 / img.width; 
+            canvas.width = 150; 
+            canvas.height = img.height * scaleSize;
             var ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            document.getElementById('imageBase64').value = canvas.toDataURL("image/jpeg", 0.3);
+            document.getElementById('imageBase64').value = canvas.toDataURL("image/jpeg", 0.4);
           }
           img.src = event.target.result;
         };
@@ -275,26 +314,28 @@
         qty: document.getElementById('qty').value,
         rate: document.getElementById('rate').value || 0,
         imageBase64: document.getElementById('imageBase64').value || "",
-        oldImgUrl: ""
+        oldImgUrl: document.getElementById('oldImgUrl').value || ""
       });
       
       document.getElementById('itemName').value = ""; document.getElementById('qty').value = "";
       document.getElementById('rate').value = ""; document.getElementById('imageFile').value = "";
       document.getElementById('imageBase64').value = "";
+      document.getElementById('oldImgUrl').value = "";
       document.getElementById('photoLabel').innerHTML = "📸 Tap to Take Photo"; document.getElementById('photoLabel').style.color = "#1a73e8";
       
-      updateCartUI(); saveDraft();
-      // Yahan Focus add kiya gaya hai, taaki sirf naya item add hone par screen upar jaye
+      updateCartUI(); 
+      saveDraft();
       document.getElementById('itemName').focus(); 
     }
 
-    
     function saveDraft() {
       try {
         localStorage.setItem("ganesh_cart", JSON.stringify(cart));
         localStorage.setItem("ganesh_party", document.getElementById('partyName')?.value || "");
+        localStorage.setItem("ganesh_phone", document.getElementById('partyPhone')?.value || "");
         localStorage.setItem("ganesh_parcel", document.getElementById('parcelCharges')?.value || "0");
         localStorage.setItem("ganesh_billno", activeBillNo || "");
+        localStorage.setItem("ganesh_editingMode", editingMode);
       } catch(e){}
     }
 
@@ -303,19 +344,37 @@
         var savedCart = localStorage.getItem("ganesh_cart");
         if(savedCart){
           cart = JSON.parse(savedCart) || [];
-          document.getElementById('partyName').value = localStorage.getItem("ganesh_party") || "";
-          document.getElementById('parcelCharges').value = localStorage.getItem("ganesh_parcel") || "0";
-          activeBillNo = localStorage.getItem("ganesh_billno") || "";
+          if(cart.length > 0) {
+            document.getElementById('partyName').value = localStorage.getItem("ganesh_party") || "";
+            document.getElementById('partyPhone').value = localStorage.getItem("ganesh_phone") || "";
+            document.getElementById('parcelCharges').value = localStorage.getItem("ganesh_parcel") || "0";
+            activeBillNo = localStorage.getItem("ganesh_billno") || "";
+            editingMode = localStorage.getItem("ganesh_editingMode") === "true";
+            
+            document.getElementById('billHeader').innerText = (editingMode ? "Editing: " : "New: ") + document.getElementById('partyName').value;
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            updateCartUI();
+          }
         }
       } catch(e){}
     }
 
+    function clearDraft() {
+      localStorage.removeItem("ganesh_cart");
+      localStorage.removeItem("ganesh_party");
+      localStorage.removeItem("ganesh_phone");
+      localStorage.removeItem("ganesh_parcel");
+      localStorage.removeItem("ganesh_billno");
+      localStorage.removeItem("ganesh_editingMode");
+    }
 
     function updateCartUI() {
-      var list = document.getElementById('itemList');
-      list.innerHTML = ""; currentItemsTotal = 0;
+      currentItemsTotal = 0;
+      var htmlBuffer = ""; 
+      var len = cart.length;
       
-      for(var i = 0; i < cart.length; i++) {
+      for(var i = 0; i < len; i++) {
         var qtyStr = parseFloat(cart[i].qty) || 0;
         var rateStr = parseFloat(cart[i].rate) || 0;
         var total = qtyStr * rateStr;
@@ -324,19 +383,19 @@
         var displayRate = parseFloat(rateStr.toFixed(2));
         var displayTotal = parseFloat(total.toFixed(2));
         
-        list.innerHTML += "<li class='cart-item'><span class='cart-item-text'>" + (i+1) + ". " + cart[i].itemName + " <br><span style='font-size:12px; color:#777;'>₹" + displayRate + " × " + qtyStr + " = <strong>₹" + displayTotal + "</strong></span></span>" +
+        htmlBuffer += "<li class='cart-item'><span class='cart-item-text'>" + (i+1) + ". " + cart[i].itemName + " <br><span style='font-size:12px; color:#777;'>₹" + displayRate + " × " + qtyStr + " = <strong>₹" + displayTotal + "</strong></span></span>" +
                           "<div class='action-btns'><button type='button' class='edit-btn' onclick='editItem(" + i + ")'>✎ Edit</button><button type='button' class='del-btn' onclick='deleteItem(" + i + ")'>✖</button></div></li>";
       }
       
-      document.getElementById('itemCount').innerText = cart.length;
+      document.getElementById('itemList').innerHTML = htmlBuffer;
+      document.getElementById('itemCount').innerText = len;
       
       var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
       var finalTotal = currentItemsTotal + pCharge;
       document.getElementById('grandTotal').innerText = parseFloat(finalTotal.toFixed(2));
       
       var fBtn = document.getElementById('finalBtn');
-      if(cart.length > 0) { fBtn.classList.remove('hidden'); } else { fBtn.classList.add('hidden'); }
-      // Yahan se focus hata diya gaya hai taaki parcel charge type karte waqt screen jump na kare
+      if(len > 0) { fBtn.classList.remove('hidden'); } else { fBtn.classList.add('hidden'); }
     }
 
     function editItem(index) {
@@ -344,18 +403,24 @@
       document.getElementById('qty').value = cart[index].qty;
       document.getElementById('rate').value = cart[index].rate == 0 ? "" : cart[index].rate;
       document.getElementById('imageBase64').value = cart[index].imageBase64;
+      document.getElementById('oldImgUrl').value = cart[index].oldImgUrl || "";
       
       if(cart[index].imageBase64 || cart[index].oldImgUrl) {
          document.getElementById('photoLabel').innerHTML = "✅ Photo Attached!";
          document.getElementById('photoLabel').style.color = "#0f9d58";
       }
-      cart.splice(index, 1); updateCartUI(); saveDraft();
-      // Yahan bhi focus add kiya hai taaki item edit karne ke baad upar jaye
+      cart.splice(index, 1); 
+      updateCartUI(); 
+      saveDraft();
       document.getElementById('itemName').focus();
     }
 
     function deleteItem(index) {
-      if(confirm("Item hatana chahte hain?")) { cart.splice(index, 1); updateCartUI(); saveDraft(); }
+      if(confirm("Item hatana chahte hain?")) { 
+        cart.splice(index, 1); 
+        updateCartUI(); 
+        saveDraft(); 
+      }
     }
 
     function uploadAndGenerateBill() {
@@ -364,6 +429,7 @@
       var btn = document.getElementById('finalBtn');
       var msg = document.getElementById('statusMsg');
       var partyName = document.getElementById('partyName').value;
+      var partyPhone = document.getElementById('partyPhone').value.replace(/\D/g,''); 
       var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
 
       btn.innerText = editingMode ? "Updating Data..." : "Generating PDF...";
@@ -386,14 +452,25 @@
       .then(response => response.json())
       .then(data => {
         if(data.success) {
+          var finalTotal = currentItemsTotal + pCharge;
+          
+          var waButtonHTML = "";
+          if(partyPhone.length >= 10) {
+            if(partyPhone.length == 10) partyPhone = "91" + partyPhone; 
+            var textMsg = "Hello " + partyName + ",\nAapka Ganesh Mobile Covers ka bill ready hai.\nGrand Total: ₹" + parseFloat(finalTotal.toFixed(2)) + "\n\nNiche diye link se PDF bill download karein:\n" + data.url;
+            waButtonHTML = '<a href="https://wa.me/' + partyPhone + '?text=' + encodeURIComponent(textMsg) + '" target="_blank" style="background:#25D366; color:white; padding:12px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px;">💬 Send Link on WhatsApp</a>';
+          }
+
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
-                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; cursor:pointer; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</a>' +
+                          waButtonHTML + 
+                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share (Asli File)</a>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           
           btn.classList.add('hidden');
-          cart = []; localStorage.removeItem('ganesh_cart'); localStorage.removeItem('ganesh_party'); localStorage.removeItem('ganesh_parcel'); localStorage.removeItem('ganesh_billno'); 
+          cart = []; 
+          clearDraft(); 
         } else {
           msg.innerHTML = '<span style="color: red;">Error: ' + data.error + '</span>';
           btn.disabled = false;

@@ -12,6 +12,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/3xQ4D7cz/49652EA9-11B3-4971-93FD-D547548AF4C6-2.png">
 
   <style>
+    /* PULL-TO-REFRESH BLOCKER ADDED HERE */
+    html, body { overscroll-behavior-y: contain; }
+    
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f7f9; padding: 15px; color: #333; -webkit-font-smoothing: antialiased; }
     .container { background: #ffffff; padding: 25px 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); max-width: 420px; margin: 15px auto; contain: content; }
@@ -26,7 +29,6 @@
     .row { display: flex; gap: 15px; }
     .row > div { flex: 1; }
     
-    /* YAHAN AUTO-SUGGEST LIST KI DESIGN HAI */
     .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 99; background: #fff; border: 1px solid #1a73e8; border-radius: 8px; max-height: 180px; overflow-y: auto; box-shadow: 0 8px 16px rgba(26,115,232,0.15); margin-top: 4px; display: none; }
     .autocomplete-item { padding: 12px 15px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 15px; color: #333; font-weight: 500; }
     .autocomplete-item:last-child { border-bottom: none; }
@@ -110,7 +112,6 @@
     
     <form id="itemForm" onsubmit="addItemLocal(this)">
       <label>Item / Model Name</label>
-      <!-- YAHAN AUTOCOMPLETE BOX ADD KIYA GAYA HAI -->
       <div style="position: relative; width: 100%;">
         <input type="text" id="itemName" placeholder="e.g. magsafe smoke" required autocomplete="off" oninput="showSuggestions(this.value)" onclick="showSuggestions(this.value)">
         <div id="suggestionList" class="autocomplete-list"></div>
@@ -162,11 +163,16 @@
     var activeBillNo = "";
     var fetchedBills = [];
     var fetchedDrafts = [];
-    
-    // NAYI MEMORY LIST JO ITEMS KE NAAM YAAD RAKHEGI
     var savedItemsList = [];
 
-    // Screen par kahin aur click karne se suggestion list band ho jayegi
+    // ACCIDENTAL REFRESH/BACK BUTTON WARNING
+    window.addEventListener('beforeunload', function (e) {
+      if (activeBillNo !== "") {
+        e.preventDefault();
+        e.returnValue = 'Aapka bill abhi poora nahi hua hai, kya aap sach mein page refresh/band karna chahte hain?';
+      }
+    });
+
     document.addEventListener("click", function (e) {
       if (e.target.id !== "itemName") {
         var listDiv = document.getElementById('suggestionList');
@@ -174,7 +180,6 @@
       }
     });
 
-    // Suggestion List Dikhane Ka Jadoo
     function showSuggestions(val) {
       var listDiv = document.getElementById('suggestionList');
       listDiv.innerHTML = "";
@@ -194,7 +199,7 @@
         div.onclick = function() {
           document.getElementById('itemName').value = this.innerText;
           listDiv.style.display = "none";
-          document.getElementById('qty').focus(); // Select karte hi cursor Qty par chala jayega
+          document.getElementById('qty').focus(); 
         };
         listDiv.appendChild(div);
       }
@@ -224,7 +229,6 @@
       fetchCloudDrafts();
       restoreDraft();
       
-      // Load Memory Items
       try {
         var storedNames = localStorage.getItem("ganesh_saved_items");
         if(storedNames) savedItemsList = JSON.parse(storedNames);
@@ -306,7 +310,7 @@
       .then(data => {
         if(data.success) {
           alert("Bill cloud par successfully HOLD ho chuka hai!");
-          clearDraft(); location.reload();
+          activeBillNo = ""; clearDraft(); location.reload();
         } else {
           alert("Draft save failed."); holdBtn.disabled = false; holdBtn.innerText = "⏸ Save as Draft (Hold Bill)";
         }
@@ -410,7 +414,7 @@
 
     function cancelBill() {
       if(confirm("Are you sure you want to cancel? Data will not be saved.")) {
-        cart = []; clearDraft(); updateCartUI();
+        cart = []; activeBillNo = ""; clearDraft(); updateCartUI();
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
       }
@@ -443,7 +447,6 @@
       
       var currentItemName = document.getElementById('itemName').value.trim();
       
-      // ITEM NAAM MEMORY ME SAVE KARO (AGAR PEHLE SE NAHI HAI TO)
       if(currentItemName && savedItemsList.indexOf(currentItemName) === -1) {
         savedItemsList.push(currentItemName);
         localStorage.setItem("ganesh_saved_items", JSON.stringify(savedItemsList));
@@ -480,21 +483,21 @@
 
     function restoreDraft() {
       try {
-        var savedCart = localStorage.getItem("ganesh_cart");
-        if(savedCart){
-          cart = JSON.parse(savedCart) || [];
-          if(cart.length > 0) {
-            document.getElementById('partyName').value = localStorage.getItem("ganesh_party") || "";
-            document.getElementById('partyPhone').value = localStorage.getItem("ganesh_phone") || "";
-            document.getElementById('parcelCharges').value = localStorage.getItem("ganesh_parcel") || "0";
-            activeBillNo = localStorage.getItem("ganesh_billno") || "";
-            editingMode = localStorage.getItem("ganesh_editingMode") === "true";
-            
-            document.getElementById('billHeader').innerText = (editingMode ? "Editing: " : "New: ") + document.getElementById('partyName').value;
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-            updateCartUI();
-          }
+        var bNo = localStorage.getItem("ganesh_billno");
+        if(bNo) {
+          activeBillNo = bNo;
+          document.getElementById('partyName').value = localStorage.getItem("ganesh_party") || "";
+          document.getElementById('partyPhone').value = localStorage.getItem("ganesh_phone") || "";
+          document.getElementById('parcelCharges').value = localStorage.getItem("ganesh_parcel") || "0";
+          editingMode = localStorage.getItem("ganesh_editingMode") === "true";
+          
+          var savedCart = localStorage.getItem("ganesh_cart");
+          if(savedCart) cart = JSON.parse(savedCart) || [];
+          
+          document.getElementById('billHeader').innerText = (editingMode ? "Editing: " : "New: ") + document.getElementById('partyName').value;
+          document.getElementById('step1').classList.add('hidden');
+          document.getElementById('step2').classList.remove('hidden');
+          updateCartUI();
         }
       } catch(e){}
     }
@@ -568,7 +571,7 @@
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           btn.classList.add('hidden'); document.getElementById('holdBtn').classList.add('hidden');
-          cart = []; clearDraft(); 
+          cart = []; activeBillNo = ""; clearDraft(); 
         } else {
           msg.innerHTML = '<span style="color: red;">Error: ' + data.error + '</span>'; btn.disabled = false;
         }

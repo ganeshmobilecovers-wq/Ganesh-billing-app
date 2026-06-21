@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/3xQ4D7cz/49652EA9-11B3-4971-93FD-D547548AF4C6-2.png">
 
   <style>
-    /* PULL-TO-REFRESH BLOCKER ADDED HERE */
+    /* PULL-TO-REFRESH BLOCKER */
     html, body { overscroll-behavior-y: contain; }
     
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
@@ -70,14 +70,31 @@
     .parcel-box label { color: #f57f17; font-size: 14px; margin: 0; }
     .parcel-box input { width: 100px; padding: 8px; border: 1px solid #ffb300; border-radius: 8px; font-weight: bold; text-align: right; }
     .draft-section { background: #f0f4f8; padding: 12px; border-radius: 14px; margin-bottom: 20px; border-left: 4px solid #ff9800; }
+
+    /* QR CODE POPUP STYLES */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .modal-box { background: #fff; padding: 30px; border-radius: 20px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    .qr-image { width: 200px; height: 200px; margin: 15px auto; border: 2px solid #f4f7f9; border-radius: 10px; padding: 5px; }
   </style>
 </head>
 <body onload="checkLocalStorageAndLoad()">
+
+  <!-- QR CODE POPUP DABBA -->
+  <div id="qrModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 style="color:#d32f2f; margin-bottom: 5px; font-size: 20px;">Share App 🚀</h3>
+      <p style="font-size: 13px; color: #666; font-weight: 500;">Scan to open on any mobile</p>
+      <img id="qrCodeImg" class="qr-image" src="" alt="Loading QR...">
+      <button onclick="closeQRCode()" class="btn-primary" style="margin-top: 15px; padding: 12px;">✖ Close</button>
+    </div>
+  </div>
 
   <div class="container" id="step1">
     <div class="brand-header">
       <img src="https://i.postimg.cc/3xQ4D7cz/49652EA9-11B3-4971-93FD-D547548AF4C6-2.png" alt="Logo" class="brand-logo">
       <h2 class="brand-title">Ganesh Covers</h2>
+      
+      <button type="button" onclick="showQRCode()" style="background: none; border: none; color: #1a73e8; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; padding: 5px;">🔗 QR Code Dikhao</button>
     </div>
     
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px; margin-bottom: 6px;">
@@ -164,6 +181,19 @@
     var fetchedBills = [];
     var fetchedDrafts = [];
     var savedItemsList = [];
+
+    // QR CODE FUNCTIONALITY
+    function showQRCode() {
+      var currentAppURL = window.location.href.split('#')[0].split('?')[0]; 
+      var qrAPI = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(currentAppURL);
+      
+      document.getElementById('qrCodeImg').src = qrAPI;
+      document.getElementById('qrModal').classList.remove('hidden');
+    }
+
+    function closeQRCode() {
+      document.getElementById('qrModal').classList.add('hidden');
+    }
 
     // ACCIDENTAL REFRESH/BACK BUTTON WARNING
     window.addEventListener('beforeunload', function (e) {
@@ -420,6 +450,7 @@
       }
     }
 
+    // YAHAN PHOTO QUALITY BADHA DI GAYI HAI (400px, 0.7 Quality)
     document.getElementById('imageFile').addEventListener('change', function(e) {
       var file = e.target.files[0];
       var label = document.getElementById('photoLabel');
@@ -430,9 +461,12 @@
           var img = new Image();
           img.onload = function() {
             var canvas = document.createElement('canvas');
-            var scaleSize = 150 / img.width; canvas.width = 150; canvas.height = img.height * scaleSize;
-            var ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            document.getElementById('imageBase64').value = canvas.toDataURL("image/jpeg", 0.4);
+            var scaleSize = 400 / img.width; 
+            canvas.width = 400; 
+            canvas.height = img.height * scaleSize;
+            var ctx = canvas.getContext("2d"); 
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            document.getElementById('imageBase64').value = canvas.toDataURL("image/jpeg", 0.7);
           }
           img.src = event.target.result;
         };

@@ -43,7 +43,7 @@
     .btn-hold { background: linear-gradient(135deg, #607d8b, #455a64); color: white; width: 100%; padding: 15px; border: none; border-radius: 14px; font-weight: 700; margin-top: 12px; cursor: pointer; font-size: 16px; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     
-    .cart-box { background: #f8fafc; border: 1px solid #e0e4e8; padding: 15px; margin-top: 25px; border-radius: 16px; will-change: transform; transform: translateZ(0); }
+    .cart-box { background: #f8fafc; border: 1px solid #e0e4e8; padding: 15px; margin-top: 25px; border-radius: 16px; }
     .cart-header { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 10px; }
     #itemList { list-style-type: none; max-height: 350px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
@@ -52,14 +52,14 @@
     .del-btn { background: #feebee; color: #c62828; border: none; padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
     
     .recent-bills-box { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
-    .bill-card { background: #fff; border: 1px solid #ddd; border-left: 4px solid #1a73e8; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; will-change: transform; }
+    .bill-card { background: #fff; border: 1px solid #ddd; border-left: 4px solid #1a73e8; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .bill-info h4 { margin-bottom: 4px; font-size: 15px; color: #333; }
     .bill-info p { font-size: 12px; color: #777; }
     
     .bill-edit-btn { background: #1a73e8; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center;}
     .bill-dl-btn { background: #0f9d58; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; margin-top: 6px; }
     .bill-resume-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%; text-align: center; }
-    .action-col { display: flex; flex-direction: column; width: 80px; }
+    .action-col { display: flex; flex-direction: column; width: 85px; }
     
     .hidden { display: none !important; }
     #statusMsg { text-align: center; margin-top: 20px; font-weight: 600; font-size: 15px; line-height: 1.5; }
@@ -71,15 +71,14 @@
     .parcel-box input { width: 100px; padding: 8px; border: 1px solid #ffb300; border-radius: 8px; font-weight: bold; text-align: right; }
     .draft-section { background: #f0f4f8; padding: 12px; border-radius: 14px; margin-bottom: 20px; border-left: 4px solid #ff9800; }
 
-    /* QR CODE POPUP STYLES */
+    /* MODAL STYLES */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-    .modal-box { background: #fff; padding: 30px; border-radius: 20px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    .modal-box { background: #fff; padding: 25px 20px; border-radius: 20px; text-align: center; width: 85%; max-width: 330px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
     .qr-image { width: 200px; height: 200px; margin: 15px auto; border: 2px solid #f4f7f9; border-radius: 10px; padding: 5px; }
   </style>
 </head>
 <body onload="checkLocalStorageAndLoad()">
 
-  <!-- QR CODE POPUP DABBA -->
   <div id="qrModal" class="modal-overlay hidden">
     <div class="modal-box">
       <h3 style="color:#d32f2f; margin-bottom: 5px; font-size: 20px;">Share App 🚀</h3>
@@ -89,11 +88,21 @@
     </div>
   </div>
 
+  <div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 style="color:#d32f2f; margin-bottom: 10px; font-size: 18px;">Item Delete Karein? ⚠️</h3>
+      <p id="deleteItemText" style="font-size: 14px; color: #444; font-weight: 500; margin-bottom: 20px; line-height: 1.4;"></p>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="closeDeleteModal()" style="flex:1; background: #e0e0e0; color: #333; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px;">Nahi (Cancel)</button>
+        <button onclick="confirmDeleteAction()" style="flex:1; background: #d32f2f; color: white; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px;">Haan (Delete)</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container" id="step1">
     <div class="brand-header">
       <img src="https://i.postimg.cc/3xQ4D7cz/49652EA9-11B3-4971-93FD-D547548AF4C6-2.png" alt="Logo" class="brand-logo">
       <h2 class="brand-title">Ganesh Covers</h2>
-      
       <button type="button" onclick="showQRCode()" style="background: none; border: none; color: #1a73e8; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; padding: 5px;">🔗 QR Code Dikhao</button>
     </div>
     
@@ -127,7 +136,7 @@
       <button onclick="cancelBill()" style="background: none; border: none; color: #d32f2f; font-weight: bold; cursor: pointer; padding: 5px;">Cancel</button>
     </div>
     
-    <form id="itemForm" onsubmit="addItemLocal(this)">
+    <form id="itemForm" onsubmit="addItemLocal(event)">
       <label>Item / Model Name</label>
       <div style="position: relative; width: 100%;">
         <input type="text" id="itemName" placeholder="e.g. magsafe smoke" required autocomplete="off" oninput="showSuggestions(this.value)" onclick="showSuggestions(this.value)">
@@ -159,7 +168,7 @@
 
     <div class="parcel-box">
       <label>📦 Parcel / Extra Charges (₹):</label>
-      <input type="number" id="parcelCharges" placeholder="0" value="0" step="any" oninput="saveDraft(); updateCartUI();">
+      <input type="number" id="parcelCharges" placeholder="0" value="0" step="any" onkeyup="updateCartUI()" onchange="saveDraft()">
     </div>
     
     <div style="text-align: right; margin-top: 15px; font-size: 18px;">
@@ -181,12 +190,14 @@
     var fetchedBills = [];
     var fetchedDrafts = [];
     var savedItemsList = [];
+    
+    var isSubmitting = false;
+    var itemToDeleteIndex = -1; // DELETE TRACKER
 
     // QR CODE FUNCTIONALITY
     function showQRCode() {
       var currentAppURL = window.location.href.split('#')[0].split('?')[0]; 
       var qrAPI = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(currentAppURL);
-      
       document.getElementById('qrCodeImg').src = qrAPI;
       document.getElementById('qrModal').classList.remove('hidden');
     }
@@ -195,11 +206,11 @@
       document.getElementById('qrModal').classList.add('hidden');
     }
 
-    // ACCIDENTAL REFRESH/BACK BUTTON WARNING
+    // ACCIDENTAL REFRESH/BACK WARNING
     window.addEventListener('beforeunload', function (e) {
       if (activeBillNo !== "") {
         e.preventDefault();
-        e.returnValue = 'Aapka bill abhi poora nahi hua hai, kya aap sach mein page refresh/band karna chahte hain?';
+        e.returnValue = 'Bill poora nahi hua hai, kya aap ise band karna chahte hain?';
       }
     });
 
@@ -250,7 +261,7 @@
             }
           }).catch(err => {});
       } else {
-        alert("Bhai, aapka browser security ke kaaran direct phonebook allow nahi kar raha hai.\n\nLekin tension nahi! Aap jab naam ya number wale dabbe par click karenge, toh aapke keyboard ke upar apne aap 'Auto-fill' (Suggestions) aa jayega, wahan se direct select kar lijiye!");
+        alert("Phonebook suggestion select karein ya manually enter karein.");
       }
     }
 
@@ -320,7 +331,10 @@
     }
 
     function saveBillAsDraftToCloud() {
+      if(isSubmitting) return;
       if(cart.length === 0) return alert("Cart khali hai!");
+      
+      isSubmitting = true;
       var holdBtn = document.getElementById('holdBtn');
       var partyName = document.getElementById('partyName').value;
       var partyPhone = document.getElementById('partyPhone').value;
@@ -338,6 +352,7 @@
       })
       .then(response => response.json())
       .then(data => {
+        isSubmitting = false;
         if(data.success) {
           alert("Bill cloud par successfully HOLD ho chuka hai!");
           activeBillNo = ""; clearDraft(); location.reload();
@@ -345,6 +360,7 @@
           alert("Draft save failed."); holdBtn.disabled = false; holdBtn.innerText = "⏸ Save as Draft (Hold Bill)";
         }
       }).catch(e => {
+        isSubmitting = false;
         alert("Network error."); holdBtn.disabled = false; holdBtn.innerText = "⏸ Save as Draft (Hold Bill)";
       });
     }
@@ -450,7 +466,6 @@
       }
     }
 
-    // YAHAN PHOTO QUALITY BADHA DI GAYI HAI (400px, 0.7 Quality)
     document.getElementById('imageFile').addEventListener('change', function(e) {
       var file = e.target.files[0];
       var label = document.getElementById('photoLabel');
@@ -476,12 +491,13 @@
       }
     });
 
-    function addItemLocal(formElement) {
-      event.preventDefault(); 
+    function addItemLocal(e) {
+      if(e) e.preventDefault(); 
       
       var currentItemName = document.getElementById('itemName').value.trim();
-      
-      if(currentItemName && savedItemsList.indexOf(currentItemName) === -1) {
+      if(!currentItemName) return;
+
+      if(savedItemsList.indexOf(currentItemName) === -1) {
         savedItemsList.push(currentItemName);
         localStorage.setItem("ganesh_saved_items", JSON.stringify(savedItemsList));
       }
@@ -573,23 +589,49 @@
       cart.splice(index, 1); updateCartUI(); saveDraft(); document.getElementById('itemName').focus();
     }
 
+    // NEW CONFIRMATION POPUP LOGIC FOR CROSS (✖) BUTTON
     function deleteItem(index) {
-      if(confirm("Item hatana chahte hain?")) { cart.splice(index, 1); updateCartUI(); saveDraft(); }
+      itemToDeleteIndex = index;
+      var itemName = cart[index].itemName;
+      document.getElementById('deleteItemText').innerText = "Kya aap sach mein '" + itemName + "' ko list se hatana chahte hain?";
+      document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      itemToDeleteIndex = -1;
+      document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    function confirmDeleteAction() {
+      if(itemToDeleteIndex > -1) {
+        cart.splice(itemToDeleteIndex, 1);
+        updateCartUI(); 
+        saveDraft();
+      }
+      closeDeleteModal();
     }
 
     function uploadAndGenerateBill() {
+      if(isSubmitting) return; 
       if(cart.length === 0) return alert("Cart khali hai!");
-      var btn = document.getElementById('finalBtn'); var msg = document.getElementById('statusMsg');
-      var partyName = document.getElementById('partyName').value; var partyPhone = document.getElementById('partyPhone').value.replace(/\D/g,''); var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
 
-      btn.innerText = editingMode ? "Updating Data..." : "Generating PDF..."; btn.disabled = true;
-      msg.innerHTML = "<span style='color: #1a73e8;'>🔄 Data Drive par save ho raha hai, kripya app band na karein...</span>";
+      isSubmitting = true;
+      var btn = document.getElementById('finalBtn'); 
+      var msg = document.getElementById('statusMsg');
+      var partyName = document.getElementById('partyName').value; 
+      var partyPhone = document.getElementById('partyPhone').value.replace(/\D/g,''); 
+      var pCharge = parseFloat(document.getElementById('parcelCharges').value) || 0;
+
+      btn.innerText = editingMode ? "Updating Data..." : "Generating PDF..."; 
+      btn.disabled = true;
+      msg.innerHTML = "<span style='color: #1a73e8;'>🔄 Data Drive par save ho raha hai, kripya wait karein...</span>";
 
       var payload = { action: editingMode ? 'updateBill' : 'saveBill', billNo: activeBillNo, partyName: partyName, parcelCharges: pCharge, cart: cart };
 
       fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } })
       .then(response => response.json())
       .then(data => {
+        isSubmitting = false;
         if(data.success) {
           var finalTotal = currentItemsTotal + pCharge; var waButtonHTML = "";
           if(partyPhone.length >= 10) {
@@ -601,16 +643,19 @@
           msg.innerHTML = '<div style="background:#e6f4ea; padding:15px; border-radius:12px; border:1px solid #cce8d6; margin-bottom: 20px;">' + 
                           '<span style="color: #0d652d; font-size:16px;">✅ Bill Successfully ' + (editingMode ? "Updated!" : "Created!") + '</span><br><br>' +
                           waButtonHTML + 
-                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share (Asli File)</a>' +
+                          '<a href="' + data.url + '" target="_blank" style="background:#0f9d58; color:white; padding:14px 20px; text-decoration:none; border-radius:10px; font-weight:bold; display:inline-block; width:100%; text-align:center; font-size:16px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(15,157,88,0.3);">📄 Open PDF To Share</a>' +
                           '</div>' + 
                           '<button class="btn-primary" onclick="location.reload()">⟲ Go Back to Home</button>';
           btn.classList.add('hidden'); document.getElementById('holdBtn').classList.add('hidden');
           cart = []; activeBillNo = ""; clearDraft(); 
         } else {
-          msg.innerHTML = '<span style="color: red;">Error: ' + data.error + '</span>'; btn.disabled = false;
+          msg.innerHTML = '<span style="color: red;">Error: ' + data.error + '</span>'; 
+          btn.disabled = false;
         }
       }).catch(error => {
-        msg.innerHTML = '<span style="color: red;">Network Error: Internet connection check karein.</span>'; btn.disabled = false;
+        isSubmitting = false;
+        msg.innerHTML = '<span style="color: red;">Network Error: Internet connection check karein aur dobara try karein.</span>'; 
+        btn.disabled = false;
       });
     }
   </script>
